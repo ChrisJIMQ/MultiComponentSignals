@@ -1,26 +1,38 @@
 library("Durga")
 library(readxl)
+##Durga is used for estimating and comparing effect sizes##
+##All figures are already pre-generated and can be found within the output folder##
+#Universal figure dimensions
+pageWidthLarge <- 12
+pageHeightLarge <- 6
+pagePaper <- 'special'
 
-#Durga for estimating and visualising Effect sizings
+##Definitions##
+#flight OR fly = Insect Flight Cage experiment
+#Rest = Resting photo experiment
+#Tether = Tethering experiment
+#Measurements = Wing and body measurements
 
-flight <- read_excel("Insect Flight Cage.xlsx", na = c("N/A", "NA"))
+
+flight <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Insect Flight Cage.xlsx", na = c("N/A", "NA"))
 View(flight)
 
-rest <- read_excel("Resting Spreadsheet.xlsx", na = c("N/A", "NA"))
+rest <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Resting Spreadsheet.xlsx", na = c("N/A", "NA"))
 View(rest)
 
-tether <- read_excel("Tethering.xlsx", na = c("N/A", "NA"))
+tether <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Tethering.xlsx", na = c("N/A", "NA"))
 View(tether)
 
-Measurements <- read_excel("Amata Measurements.xlsx", na = c("N/A", "NA"))
+Measurements <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Amata Measurements.xlsx", na = c("N/A", "NA"))
 View(Measurements)
-#Separate spreadsheets of experiments, taken from masterdoc
 
-#InterReliability Analysis
-interReliabilityChris <- read_excel("Chris - Intereliability .xlsx", na = c("N/A", "NA"))
+##InterReliability Analysis - Comparing the two scorers to ensure there is no innate differences/bias between the two
+#Tester 1 = Chris
+#Tester 2 = Paige
+interReliabilityChris <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Chris - Intereliability .xlsx", na = c("N/A", "NA"))
 View(interReliabilityChris)
 
-interReliabilityPaige <- read_excel("Paige - Intereliability.xlsx", na = c("N/A", "NA"))
+interReliabilityPaige <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Paige - Intereliability.xlsx", na = c("N/A", "NA"))
 View(interReliabilityPaige)
 
 interReliabilityChris$LWProp <- interReliabilityChris$`Left Orange Wing Pixel #` / 
@@ -57,11 +69,16 @@ Comparison <- rbind(leftWingComparison, rightWingComparison, bodyComparison)
 noNA <- na.omit(Comparison)
 t.test(noNA$Chris, noNA$Paige, paired = TRUE)
 #Paired t.test to compare if the two analysers were comparable, 33 frames were compared from both scorers
-#No significant difference between the two
 di <- DurgaDiff(noNA, groups = c("Tester 1" = "Chris", "Tester 2" = "Paige"))
-DurgaPlot(di, left.ylab = "Proportion of orange visible")
 
-#Main Analysis 
+png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure D1.png", width = pageWidthLarge, height = 8
+    , units = "in", pointsize = 20,  res = 1000, type = "cairo")
+DurgaPlot(di, left.ylab = "Proportion of orange visible")
+dev.off()
+
+#### Spreadsheet organisation ####
+##Calculating the proportion of orange shown by each moth in each experiment
+#Calculating the proportion of each individual segment
 rest$LWProp <- rest$`Left Orange Wing Pixel #` / 
   rest$`Left Whole Wing Pixel #`
 rest$RWProp <- rest$`Right Orange Wing Pixel #` / 
@@ -86,130 +103,82 @@ tether$BProp <- tether$`Body Orange Pixel #` /
   tether$`Whole body pixel count`
 tether$WProp <- rowMeans(tether[, c("LWProp", "RWProp")], na.rm = TRUE)
 
-
-#Proportions of each segment, now average them
-
-#Averaging the 3 rest replicates
-#Rest Columns
+#Generating the mean proportion of orange shown by each moth in each experiment
+#IFC = Insect Flight Cage
 meanrest <- aggregate(rest[, c("WProp", "BProp")],
                       list(mothID = rest$`Moth No.`), 
                       FUN = function(x) mean(x, na.rm = TRUE))
 meanrest$condition <- "Resting"
 
-#Flight Columns
-#IFC = Insect Flight Cage
 meanflight <- aggregate(flight[, c("WProp", "BProp")],
                         list(mothID = flight$`Moth No.`), 
                         FUN = function(x) mean(x, na.rm = TRUE))
 meanflight$condition <- "IFC"
 
-#Tether Columns
 meantether <- aggregate(tether[, c("WProp", "BProp")],
                          list(mothID = tether$`Moth No.`),
                          FUN = function(x) mean(x, na.rm = TRUE))
 meantether$condition <- "Tethering"
 
-
-
-#### Spreadsheet organisation ####
-#First step: Turn every wing/body pixel value into a percentage. Create a new spreadhseet with these pixel values?
-
+##Preliminary analysis - testing for a relationship between body and wing size
 #if condition = flying then it is insect flight cage, but if combinedcondition = Flying then it is either Insect Flight Cage or Tethering
+#"combined condition" used for the preliminary analysis, and for presentation, "condition" will be used for final thesis/paper product
 prelim <- rbind(meanrest, meanflight, meantether)
 prelim$combinedcondition <- ifelse(prelim$condition == "Resting", "Resting", "IFC")
 
+#This moth was not used in the analysis, as only males were used in the analysis. So it needs to be removed
 prelimMeasurements <- Measurements[-14, ]
 
-#Preliminary analysis of body sizes 
 prelim$forewinglength <- prelimMeasurements$`Forewing length (mm)`
 prelim$bodylength <- prelimMeasurements$`Body length (mm)`
 prelim$bodywidth <- prelimMeasurements$`body width (mm)`
 prelim$hindwinglength <- prelimMeasurements$`Hindwing length (mm)`
 
-plot(WProp ~ forewinglength, prelim[prelim$combinedcondition == "Resting", ])
+png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure D2.png", width = pageWidthLarge, height = 8
+    , units = "in", pointsize = 20,  res = 1000, type = "cairo")
+
+layout(matrix(c(1,2,3, 4), nrow = 2, ncol = 2, byrow = TRUE))
+
+par(mar = c(5,4,2,2)+0.1)
+
+plot(WProp ~ forewinglength, prelim[prelim$combinedcondition == "Resting", ], pch = 21, col = "black", bg = 4)
 RfwlL <- lm(WProp ~ forewinglength, prelim[prelim$combinedcondition == "Resting", ])
-abline(RfwlL)
+abline(RfwlL, col = "blue", lwd = 2)
+mtext("A", side = 3, line = -1.5, cex = 1, adj = 0.05)
 summary(RfwlL)
-plot(WProp ~ forewinglength, prelim[prelim$combinedcondition == "IFC", ])
+plot(WProp ~ forewinglength, prelim[prelim$combinedcondition == "IFC", ], pch = 21, col = "black", bg = 4)
 FlightfwlL <- lm(WProp ~ forewinglength, prelim[prelim$combinedcondition == "IFC", ])
+abline(FlightfwlL, col = "blue", lwd = 2)
+mtext("B", side = 3, line = -1.5, cex = 1, adj = 0.05)
 summary(FlightfwlL)
 
-plot(BProp ~ bodylength, prelim[prelim$combinedcondition == "Resting", ])
+plot(BProp ~ bodylength, prelim[prelim$combinedcondition == "Resting", ], pch = 21, col = "black", bg = 4)
 RblL <-  lm(BProp ~ bodylength, prelim[prelim$combinedcondition == "Resting", ])
+abline(RblL, col = "blue", lwd = 2)
+mtext("C", side = 3, line = -1.5, cex = 1, adj = 0.05)
 summary(RblL)
-plot(BProp ~ bodylength, prelim[prelim$combinedcondition == "IFC", ])
+plot(BProp ~ bodylength, prelim[prelim$combinedcondition == "IFC", ], pch = 21, col = "black", bg = 4)
 FlightblL <- lm(BProp ~ bodylength, prelim[prelim$combinedcondition == "IFC", ])
+abline(FlightblL, col = "blue", lwd = 2)
+mtext("D", side = 3, line = -1.5, cex = 1, adj = 0.05)
 summary(FlightblL)
 
+dev.off()
 
-
-#Report R-Squared, F-Statistic, slope (forewinglength Estimate), and p-value
-#We fitted a linear model, and no evidence of a relationship was found in.. 6 times
-
-
-#LWd <- DurgaDiff(LWProp*100~condition, prelim)
-#par(mar = c(5,4,0.5, 1)+0.1)
-#DurgaPlot(LWd, box = TRUE, left.ylab = "Left Wing Orange %")
-
-#RWd <- DurgaDiff(RWProp*100~condition, prelim)
-#par(mar = c(5,4,0.5, 1)+0.1)
-#DurgaPlot(RWd, box = TRUE, left.ylab = "Right Wing Orange %")
-
-Wd <- DurgaDiff(WProp*100~condition, prelim)
-par(mar = c(5,4,0.5, 1)+0.1)
-DurgaPlot(Wd, left.ylab = "Wing Orange % Visibility")
-Wd
-
-Bd <- DurgaDiff(BProp*100~condition, prelim)
-par(mar = c(5,4,0.5, 1)+0.1)
-DurgaPlot(Bd, left.ylab = "Body Orange % Visibility")
-Bd
-
-#l <- lm((LWProp / RWProp)~Angle, flight)
-#summary(l)
-
-#combinedcondition is for presentations
-#For paper, use condition
-
-
-#Convert prelim from wide to long format Flight vs Rest
+##Analysis 1 - Is there a difference between the wing orange % visibility in the body and wing in each experiment?
+#Analysis 1 = Body VS Wing
+#Convert prelim from wide to long format
 prelimLong <- data.frame(mothID = rep(prelim$mothID, 2), 
                          totprop = c(prelim$WProp, prelim$BProp),
                          bodyPart = c(rep("Wing", nrow(prelim)), rep("Body", nrow(prelim))),
-                                      condition = rep(prelim$condition, 2))
-Flyd <- DurgaDiff(totprop*100~bodyPart, prelimLong[prelimLong$condition == "IFC", ], id.col = "mothID")
-par(mar = c(5,4,0.5, 1)+0.1)
-DurgaPlot(Flyd, left.ylab = "% of orange visible")
+                         condition = rep(prelim$condition, 2))
 
-Restd <- DurgaDiff(totprop*100~bodyPart, prelimLong[prelimLong$condition == "Resting", ], id.col = "mothID")
-par(mar = c(5,4,0.5, 1)+0.1)
-DurgaPlot(Restd, left.ylab = "% of orange visible")
-Restd
-
-Tetherd <- DurgaDiff(totprop*100~bodyPart, prelimLong[prelimLong$condition == "Tethering",], id.col = "mothID")
-par(mar = c(5,4,0.5, 1)+0.1)
-DurgaPlot(Tetherd, left.ylab = "% of orange visible")
-Tetherd
-
-#Reject the Null hypothesis at a 95% CI
-#Paige and Chris difference
-#Body Length and wing length
-
-#Transferring the plots into grouped figures
-
-#Flight vs Rest - Seperate experiments
-pageWidthLarge <- 12
-pageHeightLarge <- 6
-pagePaper <- 'special'
-
-png(filename = "Figure 1.png", width = pageWidthLarge, height = pageHeightLarge
-     , units = "in", pointsize = 20,  res = 1000, type = "cairo")
+png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure 5.png", width = pageWidthLarge, height = pageHeightLarge
+    , units = "in", pointsize = 20,  res = 1000, type = "cairo")
 
 layout(matrix(c(1,2,3), nrow = 1, ncol = 3, byrow = TRUE))
 
 par(mar = c(5,4,2,2)+0.1)
-#par(mar = c(5,4,0.5, 1)+0.1)
-
 
 Restd <- DurgaDiff(totprop*100~bodyPart, prelimLong[prelimLong$condition == "Resting", ], id.col = "mothID")
 DurgaPlot(Restd, left.ylab = "% of orange visible",
@@ -230,16 +199,9 @@ mtext("C", side = 3, line = -2.25, cex = 1, adj = 0.05)
 
 dev.off()
 
-pageWidthLarge <- 12
-pageHeightLarge <- 6
-pagePaper <- 'special'
-
-#Body vs wing - between experiments
-pageWidthLarge <- 12
-pageHeightLarge <- 6
-pagePaper <- 'special'
-
-png(filename = "Figure 2.png", width = pageWidthLarge, height = pageHeightLarge
+##Analysis 2 - Is there a difference between the wing orange % visibility between the three experiments when looking at the body and wing seperately
+#Analysis 2 = Flight VS Rest
+png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure 6.png", width = pageWidthLarge, height = pageHeightLarge
     , units = "in", pointsize = 20,  res = 1000, type = "cairo")
 
 layout(matrix(c(1,2), nrow = 1, ncol = 2, byrow = TRUE))
@@ -247,17 +209,15 @@ layout(matrix(c(1,2), nrow = 1, ncol = 2, byrow = TRUE))
 par(mar = c(4,4,0.5, 1)+0.1)
 
 Bd <- DurgaDiff(BProp*100~condition, prelim)
-DurgaPlot(Bd, left.ylab = "Body Orange % Visibility",
-          error.bars.type = "SD")
+DurgaPlot(Bd, left.ylab = "Body Orange % Visibility")
 mtext("A", side = 3, line = -2.25, cex = 1, adj = 0.05)
 Bd
 
 Wd <- DurgaDiff(WProp*100~condition, prelim)
-DurgaPlot(Wd, left.ylab = "Wing Orange % Visibility",
-          error.bars.type = "SD")
+DurgaPlot(Wd, left.ylab = "Wing Orange % Visibility")
 mtext("B", side = 3, line = -2.25, cex = 1, adj = 0.05)
 Wd
 
 dev.off()
 
-##Full violins?
+
