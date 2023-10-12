@@ -71,7 +71,7 @@ t.test(noNA$Chris, noNA$Paige, paired = TRUE)
 #Paired t.test to compare if the two analysers were comparable, 33 frames were compared from both scorers
 di <- DurgaDiff(noNA, groups = c("Tester 1" = "Chris", "Tester 2" = "Paige"))
 
-png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure D1.png", width = pageWidthLarge, height = 8
+png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure C1.png", width = pageWidthLarge, height = 8
     , units = "in", pointsize = 20,  res = 1000, type = "cairo")
 DurgaPlot(di, left.ylab = "Proportion of orange visible")
 dev.off()
@@ -134,7 +134,7 @@ prelim$bodylength <- prelimMeasurements$`Body length (mm)`
 prelim$bodywidth <- prelimMeasurements$`body width (mm)`
 prelim$hindwinglength <- prelimMeasurements$`Hindwing length (mm)`
 
-png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure D2.png", width = pageWidthLarge, height = 8
+png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure C2.png", width = pageWidthLarge, height = 8
     , units = "in", pointsize = 20,  res = 1000, type = "cairo")
 
 layout(matrix(c(1,2,3, 4), nrow = 2, ncol = 2, byrow = TRUE))
