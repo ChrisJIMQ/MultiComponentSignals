@@ -40,19 +40,25 @@ layout(matrix(c(1,2,3, 4), nrow = 2, ncol = 2, byrow = TRUE))
 par(mar = c(5,4,2,2)+0.1)
 
 forewingCounts <- table(Moths$`Forewing Warning Colour Score`)
-barplot(forewingCounts, col = c("grey", "#fff000", "#ffcc00", "#ff9900", "#ff6600", "#ff3300"))
+barplot(forewingCounts, main = "Moth Forewings", 
+        xlab = "Signalling Score", ylab = "Species #", 
+        col = c("grey", "#fff000", "#ffcc00", "#ff9900", "#ff6600", "#ff3300"))
 mtext("A", side = 3, line = 0.5, cex = 1, adj = 0.05)
 
 hindwingCounts <- table(Moths$`Hindwing Warning Colour Score`)
-barplot(hindwingCounts, col = c("grey", "#fff000", "#ffcc00", "#ff9900", "#ff6600", "#ff3300"))
+barplot(hindwingCounts, main = "Moth Hindwings", 
+        xlab = "Signalling Score", ylab = "Species #", 
+        col = c("grey", "#fff000", "#ffcc00", "#ff9900", "#ff6600", "#ff3300"))
 mtext("B", side = 3, line = 0.5, cex = 1, adj = 0.05)
 
 ventralCounts <- table(Butterflies$`Ventral side Female Warning Colour Score`)
-barplot(ventralCounts, col = c("grey", "#fff000", "#ffcc00", "#ff9900", "#ff6600", "#ff3300"))
+barplot(ventralCounts ,main = "Butterfly Ventral", 
+        xlab = "Signalling Score", ylab = "Species #", 
+        col = c("grey", "#fff000", "#ffcc00", "#ff9900", "#ff6600", "#ff3300"))
 mtext("C", side = 3, line = 0.5, cex = 1, adj = 0.05)
 
 dorsalCounts <- table(Butterflies$`Dorsal Side Female Warning Colour Score`)
-barplot(dorsalCounts, col = c("grey", "#fff000", "#ffcc00", "#ff9900", "#ff6600", "#ff3300"))
+barplot(dorsalCounts, main = "Butterfly Dorsal", xlab = "Signalling Score", ylab = "Species #", col = c("grey", "#fff000", "#ffcc00", "#ff9900", "#ff6600", "#ff3300"))
 mtext("D", side = 3, line = 0.5, cex = 1, adj = 0.05)
 
 dev.off()
