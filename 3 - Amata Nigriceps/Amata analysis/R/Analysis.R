@@ -210,12 +210,12 @@ par(mar = c(4,4,0.5, 1)+0.1)
 
 Bd <- DurgaDiff(BProp*100~condition, prelim)
 DurgaPlot(Bd, left.ylab = "Body Orange % Visibility")
-mtext("A", side = 3, line = -2.25, cex = 1, adj = 0.05)
+mtext("A", side = 3, line = -1, cex = 1, adj = 0.05)
 Bd
 
 Wd <- DurgaDiff(WProp*100~condition, prelim)
 DurgaPlot(Wd, left.ylab = "Wing Orange % Visibility")
-mtext("B", side = 3, line = -2.25, cex = 1, adj = 0.05)
+mtext("B", side = 3, line = -1, cex = 1, adj = 0.05)
 Wd
 
 dev.off()
