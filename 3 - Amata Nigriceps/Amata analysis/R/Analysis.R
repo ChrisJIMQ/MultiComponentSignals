@@ -1,5 +1,6 @@
 library("Durga")
 library(readxl)
+library(tidyverse)
 ##Durga is used for estimating and comparing effect sizes##
 ##All figures are already pre-generated and can be found within the output folder##
 #Universal figure dimensions
@@ -23,17 +24,24 @@ View(rest)
 tether <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Tethering.xlsx", na = c("N/A", "NA"))
 View(tether)
 
+Testing <- read_excel("Testing.xlsx")
+
 Measurements <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Amata Measurements.xlsx", na = c("N/A", "NA"))
 View(Measurements)
 
 ##InterReliability Analysis - Comparing the two scorers to ensure there is no innate differences/bias between the two
 #Tester 1 = Chris
 #Tester 2 = Paige
+#Tester 3 = Kaity
+
 interReliabilityChris <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Chris - Intereliability .xlsx", na = c("N/A", "NA"))
 View(interReliabilityChris)
 
 interReliabilityPaige <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Paige - Intereliability.xlsx", na = c("N/A", "NA"))
 View(interReliabilityPaige)
+
+interReliabilityKaity <- read_excel("~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/data/Kaity - Intereliability.xlsx", na = c("N/A", "NA"))
+View(interReliabilityKaity)
 
 interReliabilityChris$LWProp <- interReliabilityChris$`Left Orange Wing Pixel #` / 
   interReliabilityChris$`Left Whole Wing Pixel #`
@@ -50,30 +58,53 @@ interReliabilityPaige$RWProp <- interReliabilityPaige$`Right Orange Wing Pixel #
 interReliabilityPaige$BProp <- interReliabilityPaige$`Body Orange Pixel #` / 
   interReliabilityPaige$`Whole body pixel count`
 
+interReliabilityKaity$LWProp <- interReliabilityKaity$`Left Orange Wing Pixel #` / 
+  interReliabilityKaity$`Left Whole Wing Pixel #`
+interReliabilityKaity$RWProp <- interReliabilityKaity$`Right Orange Wing Pixel #` / 
+  interReliabilityKaity$`Right Whole Wing Pixel #`
+interReliabilityKaity$BProp <- interReliabilityKaity$`Body Orange Pixel #` / 
+  interReliabilityKaity$`Whole body pixel count`
+
 bodyComparison <- interReliabilityChris[, c("Video ID", "Moth No.", "Camera Angle", "Camera Side", "BProp")]
 names(bodyComparison) <- c("Video ID", "Moth No.", "Camera Angle", "Camera Side", "Chris")
 bodyComparison$Paige <- interReliabilityPaige$BProp
+bodyComparison$Kaity <- interReliabilityKaity$BProp
 bodyComparison$segment <- "Body"
 
 leftWingComparison <- interReliabilityChris[, c("Video ID", "Moth No.", "Camera Angle", "Camera Side", "LWProp")]
 names(leftWingComparison) <- c("Video ID", "Moth No.", "Camera Angle", "Camera Side", "Chris")
 leftWingComparison$Paige <- interReliabilityPaige$LWProp
+leftWingComparison$Kaity <- interReliabilityKaity$LWProp 
 leftWingComparison$segment <- "Left Wing"
 
 rightWingComparison <- interReliabilityChris[, c("Video ID", "Moth No.", "Camera Angle", "Camera Side", "RWProp")]
 names(rightWingComparison) <- c("Video ID", "Moth No.", "Camera Angle", "Camera Side", "Chris")
 rightWingComparison$Paige <- interReliabilityPaige$RWProp
+rightWingComparison$Kaity <-  interReliabilityKaity$RWProp
 rightWingComparison$segment <- "Right Wing"
 
 Comparison <- rbind(leftWingComparison, rightWingComparison, bodyComparison)
 noNA <- na.omit(Comparison)
-t.test(noNA$Chris, noNA$Paige, paired = TRUE)
+cutdata <- Testing %>%
+  filter(ID != "30") %>%
+  filter(ID != "31") %>%
+  filter(ID != "32")
+write.csv(noNA, "Testing.csv")
+View(Comparison)
+t.test(noNA$Paige, noNA$Kaity, paired = TRUE)
 #Paired t.test to compare if the two analysers were comparable, 33 frames were compared from both scorers
-di <- DurgaDiff(noNA, groups = c("Tester 1" = "Chris", "Tester 2" = "Paige"))
+di <- DurgaDiff(noNA, groups = c("Tester 2" = "Paige", "Tester 3" = "Kaity"))
 
-png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure B1.png", width = pageWidthLarge, height = 8
+png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure B4.png", width = pageWidthLarge, height = 8
     , units = "in", pointsize = 20,  res = 1000, type = "cairo")
 DurgaPlot(di, left.ylab = "Proportion of orange visible")
+dev.off()
+
+t.test(cutdata$Chris, cutdata$Kaity, paired = TRUE)
+dt <- DurgaDiff(cutdata, groups = c("Tester 2" = "Paige", "Tester 3" = "Kaity"))
+png(filename = "~/MultiComponentSignals/3 - Amata Nigriceps/Amata analysis/output/Figure B6.png", width = pageWidthLarge, height = 8
+, units = "in", pointsize = 20,  res = 1000, type = "cairo")
+DurgaPlot(dt, left.ylab = "Proportion of orange visible")
 dev.off()
 
 #### Spreadsheet organisation ####
